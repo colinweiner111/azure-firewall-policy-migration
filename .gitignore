@@ -1,0 +1,9 @@
+# Export directories (generated during migration)
+firewall-policy-export-*/
+
+# PowerShell artifacts
+*.log
+
+# OS files
+Thumbs.db
+.DS_Store
