@@ -108,7 +108,7 @@ function Get-SuggestedIPGroupName {
         $baseName = $baseName.Substring(0, 60)
     }
     
-    return "ipg-$baseName-$AddressType".ToLower()
+    return "ipg-$baseName".ToLower()
 }
 
 #endregion
@@ -256,7 +256,7 @@ foreach ($rcg in $ruleCollectionGroups) {
                 
                 # Generate IP Group suggestions
                 if ($sourceAddresses.Count -gt 0) {
-                    $suggestedName = Get-SuggestedIPGroupName -RuleCollectionName $rcName -RuleName $ruleName -AddressType "src"
+                    $suggestedName = Get-SuggestedIPGroupName -RuleCollectionName $rcName -RuleName $ruleName -AddressType "source"
                     $ipGroupSuggestions += [PSCustomObject]@{
                         SuggestedIPGroupName = $suggestedName
                         RuleCollectionGroup  = $rcg.Name
@@ -269,7 +269,7 @@ foreach ($rcg in $ruleCollectionGroups) {
                 }
                 
                 if ($destinationAddresses.Count -gt 0) {
-                    $suggestedName = Get-SuggestedIPGroupName -RuleCollectionName $rcName -RuleName $ruleName -AddressType "dst"
+                    $suggestedName = Get-SuggestedIPGroupName -RuleCollectionName $rcName -RuleName $ruleName -AddressType "destination"
                     $ipGroupSuggestions += [PSCustomObject]@{
                         SuggestedIPGroupName = $suggestedName
                         RuleCollectionGroup  = $rcg.Name
@@ -402,4 +402,6 @@ Write-Log ""
 return $exportDir
 
 #endregion
+
+
 
