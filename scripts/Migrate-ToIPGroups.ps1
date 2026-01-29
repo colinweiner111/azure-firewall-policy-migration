@@ -70,7 +70,7 @@ param(
     [switch]$ConsolidateIPGroups,
 
     [Parameter(Mandatory = $false)]
-    [switch]$SmartConsolidate
+    [switch]$SmartConsolidate,
 
     [Parameter(Mandatory = $false)]
     [string]$IPGroupMappingFile
@@ -519,6 +519,7 @@ Write-Log "3. Associate the new policy with your Azure Firewall" "Info"
 Write-Log "4. Once validated, delete the old policy if desired" "Info"
 
 #endregion
+
 
 
 
