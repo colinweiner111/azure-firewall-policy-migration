@@ -222,6 +222,7 @@ if ($ConsolidateIPGroups) {
             } else {
                 $groupName = Get-UniqueIPGroupName -BaseName $suggestion.SuggestedIPGroupName -ExistingNames $ipGroupsToCreate
             }
+            $ipGroupsToCreate[$groupName] = @{
                 Name        = $groupName
                 IPAddresses = $ipAddresses
                 UsedBy      = @("$($suggestion.RuleCollection)|$($suggestion.RuleName)")
@@ -519,6 +520,7 @@ Write-Log "3. Associate the new policy with your Azure Firewall" "Info"
 Write-Log "4. Once validated, delete the old policy if desired" "Info"
 
 #endregion
+
 
 
 
