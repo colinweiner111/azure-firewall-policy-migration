@@ -83,8 +83,7 @@ Or create the new policy and IP Groups in a different resource group:
     -PolicyName "fw-policy-prod" `
     -ExportPath ".\firewall-policy-export-YYYYMMDD-HHMMSS" `
     -NewPolicyName "fw-policy-prod-ipgroups" `
-    -NewPolicyResourceGroup "rg-firewall-new" `
-    -ConsolidateIPGroups
+    -NewPolicyResourceGroup "rg-firewall-new"
 ```
 
 ### Option B: Test with Example Policy
