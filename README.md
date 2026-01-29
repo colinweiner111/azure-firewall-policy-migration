@@ -71,8 +71,7 @@ This creates an export directory (e.g., `firewall-policy-export-20260127-120000`
     -ResourceGroupName "your-resource-group" `
     -PolicyName "your-firewall-policy" `
     -ExportPath ".\firewall-policy-export-YYYYMMDD-HHMMSS" `
-    -NewPolicyName "your-policy-ipgroups" `
-    -ConsolidateIPGroups
+    -NewPolicyName "your-policy-ipgroups"
 ```
 
 Or create the new policy and IP Groups in a different resource group:
