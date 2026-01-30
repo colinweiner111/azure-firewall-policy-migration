@@ -39,6 +39,10 @@
     If set, consolidates IP Groups by logical function (e.g., all domain controllers into one group).
     This creates a smaller, more manageable set of IP Groups (~15-25 instead of per-rule groups).
 
+.PARAMETER DestinationSubscriptionId
+    Azure subscription ID where the new policy and IP Groups will be created.
+    If not specified, resources are created in the same subscription as the source policy.
+
 .EXAMPLE
     .\Migrate-ToIPGroups.ps1 -ResourceGroupName "rg-firewall" -PolicyName "fw-policy-inline-ips"
 
@@ -73,7 +77,10 @@ param(
     [switch]$SmartConsolidate,
 
     [Parameter(Mandatory = $false)]
-    [string]$IPGroupMappingFile
+    [string]$IPGroupMappingFile,
+
+    [Parameter(Mandatory = $false)]
+    [string]$DestinationSubscriptionId
 )
 
 $ErrorActionPreference = "Stop"
@@ -173,17 +180,24 @@ Write-Log "Loaded $($ipGroupSuggestions.Count) IP Group suggestions" "Info"
 Write-Log "Fetching existing policy '$PolicyName'..." "Info"
 $existingPolicy = Get-AzFirewallPolicy -ResourceGroupName $ResourceGroupName -Name $PolicyName
 $sourceLocation = $existingPolicy.Location
+$sourceSubscriptionId = (Get-AzContext).Subscription.Id
 Write-Log "Policy found. Location: $sourceLocation, SKU: $($existingPolicy.Sku.Tier)" "Success"
 
+# Switch subscription context if destination subscription is specified
+if ($DestinationSubscriptionId -and $DestinationSubscriptionId -ne $sourceSubscriptionId) {
+    Write-Log "Switching to destination subscription: $DestinationSubscriptionId" "Info"
+    Set-AzContext -SubscriptionId $DestinationSubscriptionId | Out-Null
+    Write-Log "Subscription context switched successfully" "Success"
+}
+
 # Determine location for new resources - use destination RG location if specified
-if ($NewPolicyResourceGroup -and $NewPolicyResourceGroup -ne $ResourceGroupName) {
+if ($NewPolicyResourceGroup -and ($NewPolicyResourceGroup -ne $ResourceGroupName -or $DestinationSubscriptionId)) {
     $destRG = Get-AzResourceGroup -Name $NewPolicyResourceGroup
     $location = $destRG.Location
     Write-Log "Using destination resource group location: $location" "Info"
 } else {
     $location = $sourceLocation
 }
-Write-Log ""
 
 
 # Load custom IP Group name mappings if provided
@@ -502,14 +516,22 @@ $migrationReport = @{
     OriginalPolicy   = $PolicyName
     NewPolicy        = $NewPolicyName
     SourceResourceGroup = $ResourceGroupName
+    SourceSubscriptionId = $sourceSubscriptionId
     NewPolicyResourceGroup = $NewPolicyResourceGroup
     IPGroupResourceGroup = $IPGroupResourceGroup
+    DestinationSubscriptionId = if ($DestinationSubscriptionId) { $DestinationSubscriptionId } else { $sourceSubscriptionId }
     MigrationDate    = (Get-Date -Format 'yyyy-MM-dd HH:mm:ss')
     IPGroupsCreated  = $createdIPGroups.Count
     IPGroups         = $createdIPGroups
     RuleMappings     = $ruleToIPGroupMapping
 }
 $migrationReport | ConvertTo-Json -Depth 10 | Out-File $reportPath -Encoding UTF8
+
+# Restore original subscription context if we switched
+if ($DestinationSubscriptionId -and $DestinationSubscriptionId -ne $sourceSubscriptionId) {
+    Write-Log "Restoring original subscription context: $sourceSubscriptionId" "Info"
+    Set-AzContext -SubscriptionId $sourceSubscriptionId | Out-Null
+}
 
 Write-Log ""
 Write-Log "========================================" "Header"

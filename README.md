@@ -85,6 +85,18 @@ Or create the new policy and IP Groups in a different resource group:
     -NewPolicyResourceGroup "rg-firewall-new"
 ```
 
+
+Or create the new policy in a different subscription entirely:
+
+```powershell
+.\Migrate-ToIPGroups.ps1 `
+    -ResourceGroupName "rg-source-firewall" `
+    -PolicyName "fw-policy-prod" `
+    -ExportPath ".\firewall-policy-export-YYYYMMDD-HHMMSS" `
+    -NewPolicyName "fw-policy-prod-ipgroups" `
+    -NewPolicyResourceGroup "rg-firewall-target" `
+    -DestinationSubscriptionId "00000000-0000-0000-0000-000000000000"
+```
 ### Option B: Test with Example Policy
 
 If you want to test the migration workflow without risking production:
@@ -255,6 +267,7 @@ Creates IP Groups and a new policy using them.
 | ConsolidateIPGroups | No | Combine IP Groups with identical addresses |
 | SmartConsolidate | No | Consolidate by logical function (creates fewer, more manageable groups) |
 | WhatIf | No | Preview changes without applying |
+| DestinationSubscriptionId | No | Subscription ID for new resources (cross-subscription migration) |
 
 ## Example Policy Details
 
