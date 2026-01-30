@@ -172,8 +172,17 @@ Write-Log "Loaded $($ipGroupSuggestions.Count) IP Group suggestions" "Info"
 # Get existing policy
 Write-Log "Fetching existing policy '$PolicyName'..." "Info"
 $existingPolicy = Get-AzFirewallPolicy -ResourceGroupName $ResourceGroupName -Name $PolicyName
-$location = $existingPolicy.Location
-Write-Log "Policy found. Location: $location, SKU: $($existingPolicy.Sku.Tier)" "Success"
+$sourceLocation = $existingPolicy.Location
+Write-Log "Policy found. Location: $sourceLocation, SKU: $($existingPolicy.Sku.Tier)" "Success"
+
+# Determine location for new resources - use destination RG location if specified
+if ($NewPolicyResourceGroup -and $NewPolicyResourceGroup -ne $ResourceGroupName) {
+    $destRG = Get-AzResourceGroup -Name $NewPolicyResourceGroup
+    $location = $destRG.Location
+    Write-Log "Using destination resource group location: $location" "Info"
+} else {
+    $location = $sourceLocation
+}
 Write-Log ""
 
 
@@ -520,6 +529,7 @@ Write-Log "3. Associate the new policy with your Azure Firewall" "Info"
 Write-Log "4. Once validated, delete the old policy if desired" "Info"
 
 #endregion
+
 
 
 
